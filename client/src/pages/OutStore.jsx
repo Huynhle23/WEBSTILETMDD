@@ -1,12 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import BreadCrumb from '../components/BreadCrumb';
-// import {Helmet} from "react-helmet";
+import {useDispatch,useSelector} from 'react-redux'
 import ReactStars from "react-rating-stars-component";
-
 import Meta from '../components/Meta';
 import ProductCard from '../components/ProductCard';
+import { getAllProduct } from '../features/products/productSlice';
+
+
+
 const OutStore = () => {
     const [grid,setGrid] = useState(4)
+    const productState = useSelector(state=>state?.product?.products)
+
+    const dispatch = useDispatch()
+    useEffect(()=>{
+        getProducts()
+    },[])
+    const getProducts=()=>{
+        dispatch(getAllProduct())
+    }
+
+
     return (
         <>
             <Meta title="Our Store"/>
@@ -79,7 +93,7 @@ const OutStore = () => {
                                             <li></li>
                                         </ul>
                                     </div>
-                                    <h5 className="sub-title">Size</h5>
+                                    {/* <h5 className="sub-title">Size</h5>
                                     <div className="">
                                         <div className="form-check">
                                             <label className="form-check-label" htmlFor='color-1'>
@@ -93,7 +107,7 @@ const OutStore = () => {
                                             </label>
                                             <input type="checkbox" className="form-check-input" name="" id="color-2" value="checkedValue"/>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                             <div className="filter-card mb-3">
@@ -190,7 +204,7 @@ const OutStore = () => {
                             </div>
                             <div className="products-list pd-5">
                                 <div className="d-flex gap-10 flex-wrap">
-                                    <ProductCard grid={grid}/>
+                                    <ProductCard data={productState ? productState : []} grid={grid}/>
                                 </div>
                             </div>
                         </div>

@@ -40,11 +40,7 @@ const getColor = asyncHandle(async(req,res)=>{
 const getAllColor = asyncHandle(async(req,res)=>{
     try {
         const getColor = await ColorModel.find()
-        res.status(200).send({
-            success : true,
-            message : "get all Color successfully",
-            getColor
-        })
+        res.json(getColor)
     } catch (error) {
         console.log(error)
         res.status(500).send({

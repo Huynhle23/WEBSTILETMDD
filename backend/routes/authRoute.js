@@ -3,18 +3,25 @@ const router = express.Router()
 const {createUser,loginUser,getAllUsers,getsignUser,deletesignUser,updateUser,
      blockUser, unblockUser, handleRefreshToken, logout, updatePassword, 
      forgotPasswordToken, resetPassword, loginAdmin, getWishList, saveAddress, userCart,
-     getUserCart, emptyCart, applyCoupon, createOrder, getOrders, updateOrderStatus} = require('../controllers/userController.js')
+     getUserCart,createOrder, removeProductCart, updateProductQuantityCart, getMyOrder,
+     emptyCart,updateStatusOrder,
+     getAllOrder} = require('../controllers/userController.js')
 const {authMiddleware,isAdmin} = require('../middlewares/authMiddleware.js')
 
 router.post('/register',createUser)
 router.post('/login',loginUser)
 router.post('/admin-login',loginAdmin)
 router.post('/forgot-password-token',forgotPasswordToken)
-// cart
+// create cart
 router.post('/cart',authMiddleware,userCart)
-router.post('/cart/applycounpon',authMiddleware,applyCoupon)
 
-router.post('/cart/cash-order',authMiddleware,createOrder)
+router.delete('/delete-cart/:cartItemId',authMiddleware,removeProductCart)
+
+router.put('/update-cart/:cartItemId/:newQuantity',authMiddleware,updateProductQuantityCart)
+
+// router.post('/cart/applycounpon',authMiddleware,applyCoupon)
+
+router.post('/cart/create-order',authMiddleware,createOrder)
 
 router.get('/get-wishlist',authMiddleware,getWishList)
 
@@ -29,8 +36,12 @@ router.get("/refresh", handleRefreshToken);
 
 router.get("/logout", logout);
 
-router.get('/get-orders',authMiddleware,getOrders)
-router.put('/order/update-order/:id',authMiddleware,isAdmin,updateOrderStatus)
+router.get('/getmyorders',authMiddleware,getMyOrder)
+router.get('/get-all-orders',authMiddleware,isAdmin,getAllOrder)
+
+// router.post('/get-orders-id/:id',authMiddleware,isAdmin,getOrderById)
+
+router.put('/order/update-order/:_id/:status',authMiddleware,isAdmin,updateStatusOrder)
 
 router.put('/password',authMiddleware,updatePassword)
 router.put('/edit-user',authMiddleware ,updateUser)

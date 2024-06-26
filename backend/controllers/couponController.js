@@ -14,6 +14,25 @@ const createCoupon=asyncHandle(async(req,res)=>{
         })
     }
 })
+
+const getACoupon = asyncHandle(async(req,res)=>{
+    const {_id}= req.params
+    try {
+        const getACoupon = await CouponModel.findById(_id)
+        res.status(200).send({
+            success : true,
+            message : "get A Coupon successfully",
+            getACoupon
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success : false,
+            message : "get ACoupon false!"
+        })
+    }
+})
+
 const getAllCoupons=asyncHandle(async(req,res)=>{
     try {
         const Coupons = await CouponModel.find() // nhận ở request
@@ -27,9 +46,9 @@ const getAllCoupons=asyncHandle(async(req,res)=>{
     }
 })
 const updateCoupon=asyncHandle(async(req,res)=>{
-    const {id}=req.params
+    const {_id}=req.params
     try {
-        const UpdateCoupon = await CouponModel.findByIdAndUpdate(id,req.body,{new:true}) // nhận ở request
+        const UpdateCoupon = await CouponModel.findByIdAndUpdate(_id,req.body,{new:true}) // nhận ở request
         res.json(UpdateCoupon)
     } catch (error) {
         console.log(error)
@@ -40,9 +59,9 @@ const updateCoupon=asyncHandle(async(req,res)=>{
     }
 })
 const deleteCoupon=asyncHandle(async(req,res)=>{
-    const {id}=req.params
+    const {_id}=req.params
     try {
-        const deleteCoupon = await CouponModel.findByIdAndDelete(id) // nhận ở request
+        const deleteCoupon = await CouponModel.findByIdAndDelete(_id) // nhận ở request
         res.json(deleteCoupon)
     } catch (error) {
         console.log(error)
@@ -53,4 +72,4 @@ const deleteCoupon=asyncHandle(async(req,res)=>{
     }
 })
 
-module.exports = {createCoupon,getAllCoupons,updateCoupon,deleteCoupon}
+module.exports = {getACoupon,createCoupon,getAllCoupons,updateCoupon,deleteCoupon}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Container from '../components/Container';
 import Meta from '../components/Meta';
 import BreadCrumb from '../components/BreadCrumb';
@@ -8,21 +8,47 @@ import ReactImageZoom from 'react-image-zoom';
 import Color from '../pages/Color'
 import { IoIosGitCompare } from "react-icons/io";
 import { FaHeart } from "react-icons/fa";
+import { useNavigate, useParams } from 'react-router-dom';
+import {useDispatch,useSelector} from 'react-redux'
+import { getAProduct } from '../features/products/productSlice';
+import {toast} from 'react-toastify' 
+import { cart, getCart } from '../features/users/userSlice';
+
 const SingleProduct = () => {
-    const coppyToLink =(text)=>{
-        console.log('text',text)
-        var textField = document.createElement('textarea')
-        textField.innerHTML=text
-        document.body.appendChild(textField)
-        textField.select()
-        document.execCommand('copy')
-        textField.remove()
+    const [color,setColor] = useState(null)
+    const [quantity,setQuantity] = useState(1)
+    const [alrealAdd,setAlrealAdd] = useState(false)
+    const {id} = useParams()
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const pru = useSelector(state=>state.product?.AProduct?.findProduct)
+    const cartState = useSelector(state=>state.auth?.cartUser)
+    useEffect(()=>{
+        dispatch(getAProduct(id))
+        dispatch(getCart())
+        window.scroll(0,0)
+    },[])
+    useEffect(()=>{
+        for(let i=0;i<cartState?.length;i++){
+            if(id === cartState[i]?.productId?._id){
+                setAlrealAdd(true)
+            }
+        }
+    },[])
+    const uploadCart=()=>{
+        if(color === null){
+            toast.error("Please choose color !")
+            return false
+        }else{
+            dispatch(cart({productId:pru?._id,quantity,color,price:pru?.price}))
+            navigate('/cart')
+        }
     }
     const props = {
         width: 400, 
         height: 500, 
         zoomWidth: 500, 
-        img: "https://www.bhphotovideo.com/images/images2500x2500/apple_m02q3ll_a_watch_series_6_gps_1594609.jpg"};
+        img: pru?.images[0]?.url ? pru?.images[0]?.url : "https://www.bhphotovideo.com/images/images2500x2500/apple_m02q3ll_a_watch_series_6_gps_1594609.jpg" };
     const [orderProduct,setOrderProduct] = useState(true)
     return (
         <>  
@@ -37,32 +63,27 @@ const SingleProduct = () => {
                             </div>
                         </div>
                         <div className="other-product-images d-flex flex-wrap gap-15">
-                            <div className="">
-                                <img src="https://i5.walmartimages.com/asr/a5fea207-96d5-4874-95ee-d618b73506d3.075f2d5466eaba28d0fe4107cc5f7e07.jpeg" className='img-fluid' alt="watch" />
-                            </div>
-                            <div className="">
-                                <img src="https://i5.walmartimages.com/asr/a5fea207-96d5-4874-95ee-d618b73506d3.075f2d5466eaba28d0fe4107cc5f7e07.jpeg" className='img-fluid' alt="watch" />
-                            </div>
-                            <div className="">
-                                <img src="https://i5.walmartimages.com/asr/a5fea207-96d5-4874-95ee-d618b73506d3.075f2d5466eaba28d0fe4107cc5f7e07.jpeg" className='img-fluid' alt="watch" />
-                            </div>
-                            <div className="">
-                                <img src="https://i5.walmartimages.com/asr/a5fea207-96d5-4874-95ee-d618b73506d3.075f2d5466eaba28d0fe4107cc5f7e07.jpeg" className='img-fluid' alt="watch" />
-                            </div>
+                            {
+                                pru?.images?.map((e,index)=>(
+                                    <div className="" key={index}>
+                                        <img src={e?.url} className='img-fluid' alt="product" />
+                                    </div>
+                                ))
+                            }
                         </div>
                     </div>
                     <div className="col-6">
                         <div className="main-product-details">
                             <div className="border-bottom">
-                                <h3 className='title'>Apple watch series 8 utra</h3>
+                                <h3 className='title'>{pru?.title}</h3>
                             </div>
                             <div className="border-bottom py-3">
-                                <p className="price">$ 100</p>
+                                <p className="price">$ {pru?.price}</p>
                                 <div className="d-flex align-items-center gap-10">
                                     <ReactStars
                                         count={5}
                                         size={24}
-                                        value={4} 
+                                        value={pru?.totalrating} 
                                         edit={false}
                                         activeColor="#ffd700"
                                     />
@@ -73,45 +94,58 @@ const SingleProduct = () => {
                             <div className="border-bottom py-3">
                                 <div className="d-flex gap-10 align-items-center my-2">
                                     <h3 className='mb-0 product-heading'>Type:</h3>
-                                    <p className='mb-0 product-data'>Watch</p>
+                                    <p className='mb-0 product-data'>{pru?.category}</p>
                                 </div>
                                 <div className="d-flex gap-10 align-items-center my-2">
                                     <h3 className='mb-0 product-heading'>Brand:</h3>
-                                    <p className='mb-0 product-data'>Havels</p>
+                                    <p className='mb-0 product-data'>{pru?.brand}</p>
                                 </div>
                                 <div className="d-flex gap-10 align-items-center my-2">
                                     <h3 className='mb-0 product-heading'>Category:</h3>
-                                    <p className='mb-0 product-data'>Watch</p>
+                                    <p className='mb-0 product-data'>{pru?.category}</p>
                                 </div>
                                 <div className="d-flex gap-10 align-items-center my-2">
                                     <h3 className='mb-0 product-heading'>Tags:</h3>
-                                    <p className='mb-0 product-data'>Watch</p>
+                                    <p className='mb-0 product-data'>{pru?.tags}</p>
                                 </div>
                                 <div className="d-flex gap-10 align-items-center my-2">
                                     <h3 className='mb-0 product-heading'>Availablity:</h3>
                                     <p className='mb-0 product-data'>In Stock</p>
                                 </div>
-                                <div className="d-flex gap-10 flex-column mt-2 mb-3">
-                                    <h3 className='mb-0 product-heading'>Size:</h3>
-                                    <div className="d-flex flex-wrap gap-15">
-                                        <span className="badge border border-1 bg-white text-dark border-secondary">S</span>
-                                        <span className="badge border border-1 bg-white text-dark border-secondary">M</span>
-                                        <span className="badge border border-1 bg-white text-dark border-secondary">xl</span>
-                                        <span className="badge border border-1 bg-white text-dark border-secondary">xxl</span>
-                                    </div>
-                                </div>
-                                <div className="d-flex gap-10 flex-column mt-2 mb-3">
-                                    <h3 className='mb-0 product-heading'>Color:</h3>
-                                    <Color/>
-                                </div>
+                                {
+                                    alrealAdd === false && <>
+                                        <div className="d-flex gap-10 flex-column mt-2 mb-3">
+                                            <h3 className='mb-0 product-heading'>Color:</h3>
+                                            <Color setColor={setColor} colorData={pru?.color}/>
+                                        </div>
+                                    </>
+                                }
                                 <div className="d-flex gap-10 flex-row align-items-center gap-15 my-2">
-                                    <h3 className='mb-0 product-heading'>Quantity:</h3>
-                                    <div className="">
-                                        <input className='form-control' type="number" name=""  style={{width:"70px"}} min={1} max={10} id="" />
-                                    </div>
-                                    <div className="d-flex align-items-center gap-30 ms-5">
-                                        <button className='button border-0' type='submit'>Add To Cart</button>
-                                        <button className='border-0 button signup'>Buy It Now</button>
+                                    {
+                                        alrealAdd === false && <>
+                                            <h3 className='mb-0 product-heading'>Quantity:</h3>
+                                                <div className="">
+                                                    <input 
+                                                        className='form-control' 
+                                                        type="number" 
+                                                        name=""  
+                                                        style={{width:"70px"}} 
+                                                        min={1} 
+                                                        max={10} 
+                                                        onChange={(e)=>setQuantity(e.target.value)}
+                                                        value={quantity}
+                                                        id="" />
+                                                </div>
+                                        </>
+                                    }
+                                    <div className={alrealAdd ? "ms-0":"ms-5" + "d-flex align-items-center gap-30 ms-5"}>
+                                        <button 
+                                            onClick={()=>{alrealAdd ? navigate('/cart') : uploadCart()}}
+                                            className='button border-0' 
+                                            type='submit'>
+                                                {alrealAdd ? "Go to cart": "Add To Cart"}
+                                        </button>
+                                        {/* <button className='border-0 button signup'>Buy It Now</button> */}
                                     </div>
                                 </div>
                                 <div className="d-flex align-items-center gap-15">
@@ -133,18 +167,6 @@ const SingleProduct = () => {
                                         all us domestic orders within <b>5-10 business days!</b>
                                     </p>
                                 </div>
-                                <div className="my-3">
-                                    <h3 className='mb-2  product-heading'>Product Link :</h3>
-                                    <p className='mb-0 product-data'>
-                                        <a href="javascrip:void(0);"
-                                            onClick={()=>{
-                                                coppyToLink("https://www.bhphotovideo.com/images/images2500x2500/apple_m02q3ll_a_watch_series_6_gps_1594609.jpg")
-                                            }}
-                                        >
-                                            Coppy Product Link
-                                        </a>
-                                    </p>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -155,9 +177,10 @@ const SingleProduct = () => {
                     <div className="col-12">
                         <h4>Description</h4>
                         <div className="bg-white p-3">
-                            <p className="">
-                                At vero eos et accusamus et iusto odio dignissmos 
-                                ducimus qui balndtidtii paesentinum voluptatum 
+                            <p className=""
+                                dangerouslySetInnerHTML={{__html: pru?.description.toString()}}
+                            >
+                                
                             </p>
                         </div>
                     </div>
@@ -215,7 +238,7 @@ const SingleProduct = () => {
                             <div className="reviews mt-4">
                                 <div className="review">
                                     <div className="d-flex gap-10 align-items-center">
-                                        <h6 className='mb-0'>Anh Tuan</h6>
+                                        <h6 className='mb-0'>Apple Store</h6>
                                         <ReactStars
                                             count={5}
                                             size={24}

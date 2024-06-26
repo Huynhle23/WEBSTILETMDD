@@ -21,9 +21,9 @@ const CreateBrand = asyncHandle(async(req,res)=>{
 })
 
 const getBrand = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const getBrand = await BrandModel.findById(id)
+        const getBrand = await BrandModel.findById(_id)
         res.status(200).send({
             success : true,
             message : "get Brand successfully",
@@ -41,11 +41,7 @@ const getBrand = asyncHandle(async(req,res)=>{
 const getAllBrand = asyncHandle(async(req,res)=>{
     try {
         const getBrand = await BrandModel.find()
-        res.status(200).send({
-            success : true,
-            message : "get all Brand successfully",
-            getBrand
-        })
+        res.json(getBrand)
     } catch (error) {
         console.log(error)
         res.status(500).send({
@@ -56,9 +52,9 @@ const getAllBrand = asyncHandle(async(req,res)=>{
 })
 
 const updateBrand = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const udBrand = await BrandModel.findByIdAndUpdate(id,req.body,{new :true})
+        const udBrand = await BrandModel.findByIdAndUpdate(_id,req.body,{new :true})
         res.status(200).send({
             success : true,
             message : "update Brand successfully",
@@ -75,9 +71,9 @@ const updateBrand = asyncHandle(async(req,res)=>{
 
 
 const deleteBrand = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const delBrand = await BrandModel.findByIdAndDelete(id)
+        const delBrand = await BrandModel.findByIdAndDelete(_id)
         res.status(200).send({
             success : true,
             message : "delete Brand successfully",

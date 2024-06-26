@@ -21,9 +21,9 @@ const productCreateCategory = asyncHandle(async(req,res)=>{
 })
 
 const getCategory = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const getCategory = await CategoryModel.findById(id)
+        const getCategory = await CategoryModel.findById(_id)
         res.status(200).send({
             success : true,
             message : "get category successfully",
@@ -41,11 +41,7 @@ const getCategory = asyncHandle(async(req,res)=>{
 const getAllCategory = asyncHandle(async(req,res)=>{
     try {
         const getCategory = await CategoryModel.find()
-        res.status(200).send({
-            success : true,
-            message : "get all category successfully",
-            getCategory
-        })
+        res.json(getCategory)
     } catch (error) {
         console.log(error)
         res.status(500).send({
@@ -56,9 +52,9 @@ const getAllCategory = asyncHandle(async(req,res)=>{
 })
 
 const updateCategory = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const udCategory = await CategoryModel.findByIdAndUpdate(id,req.body,{new :true})
+        const udCategory = await CategoryModel.findByIdAndUpdate(_id,req.body,{new :true})
         res.status(200).send({
             success : true,
             message : "update category successfully",
@@ -75,9 +71,9 @@ const updateCategory = asyncHandle(async(req,res)=>{
 
 
 const deleteCategory = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const delCategory = await CategoryModel.findByIdAndDelete(id)
+        const delCategory = await CategoryModel.findByIdAndDelete(_id)
         res.status(200).send({
             success : true,
             message : "delete category successfully",

@@ -40,11 +40,7 @@ const getEnq = asyncHandle(async(req,res)=>{
 const getAllEnq = asyncHandle(async(req,res)=>{
     try {
         const getEnq = await EnqModel.find()
-        res.status(200).send({
-            success : true,
-            message : "get all Enq successfully",
-            getEnq
-        })
+        res.json(getEnq)
     } catch (error) {
         console.log(error)
         res.status(500).send({

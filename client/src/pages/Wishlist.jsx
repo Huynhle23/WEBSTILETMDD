@@ -1,56 +1,43 @@
-import React from 'react';
-import Meta from '../components/Meta';
-import BreadCrumb from '../components/BreadCrumb';
+import React, { useEffect } from "react";
+import Meta from "../components/Meta";
+import BreadCrumb from "../components/BreadCrumb";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllWishList } from "../features/users/userSlice";
+import { addToWishList } from "../features/products/productSlice";
+import ProductCard from "../components/ProductCard";
 
 const Wishlist = () => {
-    return (
-        <>
-            <Meta title="Wish List"/>
-            <BreadCrumb title="Wish List"/> 
-            <div className="wishlist-wrapper home-wrapper-2 py-5">
-                <div className="container-xxl">
-                    <div className="row">
-                        <div className="col-3">
-                            <div className="wishlist-card position-relative">
-                                <img src="images/cross.svg" alt="cross" className='position-absolute cross img-fluid' />
-                                <div className="wishlist-card-image">
-                                    <img src="images/watch.jpg" className='img-fluid w-100' alt="watch" />
-                                </div>
-                                <div className="py-3 px-3">
-                                    <h5 className='title'>Honor T1 7.0.1 GB RAM 8GB ROM 7 Inch with WI-FI 5G</h5>
-                                    <h6 className='price'>$ 100</h6>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-3">
-                            <div className="wishlist-card position-relative">
-                                <img src="images/cross.svg" alt="cross" className='position-absolute cross img-fluid' />
-                                <div className="wishlist-card-image">
-                                    <img src="images/watch.jpg" className='img-fluid w-100' alt="watch" />
-                                </div>
-                                <div className="py-3 px-3">
-                                    <h5 className='title'>Honor T1 7.0.1 GB RAM 8GB ROM 7 Inch with WI-FI 5G</h5>
-                                    <h6 className='price'>$ 100</h6>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-3">
-                            <div className="wishlist-card position-relative">
-                                <img src="images/cross.svg" alt="cross" className='position-absolute cross img-fluid' />
-                                <div className="wishlist-card-image">
-                                    <img src="images/watch.jpg" className='img-fluid w-100' alt="watch" />
-                                </div>
-                                <div className="py-3 px-3">
-                                    <h5 className='title'>Honor T1 7.0.1 GB RAM 8GB ROM 7 Inch with WI-FI 5G</h5>
-                                    <h6 className='price'>$ 100</h6>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
-    );
-}
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getAllWishList());
+  }, []);
+
+  const wishlist = useSelector((state) => state?.auth?.getWishList?.wishlist); // auth duoc tao ra o ben authSlice
+
+  const removeWishList = (id) => {
+    dispatch(addToWishList(id));
+    setTimeout(() => {
+      dispatch(getAllWishList());
+    }, 300);
+  };
+  return (
+    <>
+      <Meta title="Wish List" />
+      <BreadCrumb title="Wish List" />
+      <div className="wishlist-wrapper home-wrapper-2 py-5">
+        <div className="container-xxl">
+          <div className="row">
+            {wishlist?.length < 1 && (
+              <div className="d-flex align-items-center justify-content-center">
+                No data
+              </div>
+            )}
+            <ProductCard data={wishlist} />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default Wishlist;

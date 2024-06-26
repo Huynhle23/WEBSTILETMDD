@@ -65,11 +65,7 @@ const getAllBlog = asyncHandle(async(req,res)=>{
     try {
         const getBlog = await BlogModel.find().populate('likes').populate('dislikes') 
         
-        res.status(200).send({
-            success : true,
-            message : "get all Blog success !",
-            getBlog
-        })
+        res.json(getBlog)
     } catch (error) {
         console.log(error)
         res.status(500).send({

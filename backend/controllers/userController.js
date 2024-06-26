@@ -10,14 +10,14 @@ const cartModel = require('../models/cartModel.js');
 const productModel = require('../models/productModel.js');
 const couponModel = require('../models/couponModel.js');
 const orderModel = require('../models/orderModel.js');
-const uniquid = require("uniqid")
+// const uniquid = require("uniqid")
 // create user
 const createUser = async(req,res)=>{
     const {email} = req.body
     const exisitingUser = await userModel.findOne({email}) // kiểm tra có email nào chưa 
         if(exisitingUser){
-            return res.status(200).send({
-                success : true,
+            return res.status(500).send({
+                success : false,
                 message : 'Alrealy register please login' // nếu tìm thấy có tồn tại 
             })
         }
@@ -62,8 +62,10 @@ const loginUser = asyncHandle(async(req,res)=>{
             lastname : findUser?.lastname,
             email : findUser?.email,
             role : findUser?.role,
-            token : genarateToken(findUser?._id), // hiển thị ra token
+            token : genarateToken(findUser?._id), 
+            // hiển thị ra token
         })
+        // window.location.reload()
     }else{
         return res.status(500).send({
             success : true,
@@ -75,7 +77,6 @@ const loginUser = asyncHandle(async(req,res)=>{
 // login admin
 const loginAdmin = asyncHandle(async(req,res)=>{
     const {email,password} = req.body
-    
     const findAdmin = await userModel.findOne({email})
     if(findAdmin.role !=='admin'){
         return res.status(500).send({
@@ -101,6 +102,7 @@ const loginAdmin = asyncHandle(async(req,res)=>{
             firstname : findAdmin?.firstname,
             lastname : findAdmin?.lastname,
             email : findAdmin?.email,
+            mobile : findAdmin?.mobile,
             role : findAdmin?.role,
             token : genarateToken(findAdmin?._id), // hiển thị ra token
         })
@@ -113,7 +115,6 @@ const loginAdmin = asyncHandle(async(req,res)=>{
 })
 
 // handle refresh token 
-
 const handleRefreshToken = asyncHandle(async(req,res)=>{
     const cookie = req.cookies
     console.log(cookie)
@@ -176,17 +177,13 @@ const logout = asyncHandle(async (req, res) => {
         success : true,
         message : "clear cookies success"
     }); // forbidden
-  });
+});
 
 // get all users
 const getAllUsers = async(req,res)=>{
     try {
         const user = await userModel.find({})
-        res.status(200).send({
-            success : true,
-            message : "Get all users successfully !",
-            user
-        })
+        res.json(user)
     } catch (error) {
         console.log(error)
         res.status(500).send({
@@ -415,36 +412,16 @@ const saveAddress = asyncHandle(async(req,res)=>{
 
 // cart 
 const userCart = asyncHandle(async (req, res) => {
-    const { cart } = req.body;
+    const { productId,color,quantity,price } = req.body;
+    console.log({productId,color,quantity,price})
     const { _id } = req.user;
     try {
-      let products = []; // khởi tạo một mảng rỗng , để tí push object chứa các dữ liệu của người thêm cart
-      const user = await userModel.findById(_id);
-      // check if user already have product in cart
-      const alreadyExistCart = await cartModel.findOne({ orderby: user._id });
-      if (alreadyExistCart) {
-        // nếu user này đã có thì xóa cái cũ và update lại cái giỏ hàng mới khi người dùng thêm vào
-        await cartModel.deleteOne({ _id: alreadyExistCart._id });
-      }
-      for (let i = 0; i < cart.length; i++) {
-        let object = {};// tạo object rỗng để bỏ vào mảng products chứa các data
-        object.product = cart[i]._id; //khởi tạo key và value
-        object.count = cart[i].count;
-        object.color = cart[i].color;
-        // tìm kiếm đến id sản phẩm mà người dùng thêm vào
-        let getPrice = await productModel.findById(cart[i]._id)
-        object.price = getPrice.price; // sau có khởi tạo
-        products.push(object); // khởi tạo xong thì push vào bên trong products
-      }
-      let cartTotal = 0; 
-        //   kiểm tra tổng tiền
-      for (let i = 0; i < products.length; i++) {
-        cartTotal  += products[i].price * products[i].count;
-      }
       let newCart = await new cartModel({
-        products,
-        cartTotal,
-        orderby: user?._id,
+        userId:_id,
+        productId,
+        quantity,
+        price,
+        color,
       }).save();
 
       res.json({
@@ -465,8 +442,8 @@ const getUserCart = asyncHandle(async(req,res)=>{
     try {
         //tìm kiếm id người thêm vào giỏ hàng
         // truy tới và hiển thị ra chi tiết của product
-        const cart = await cartModel.findOne({orderby : _id})
-            .populate("products.product") 
+        const cart = await cartModel.find({userId : _id})
+            .populate("productId").populate("color")
         res.json(cart)
     } catch (error) {
         console.log(error)
@@ -477,14 +454,99 @@ const getUserCart = asyncHandle(async(req,res)=>{
     }
 })
 
-//  tìm id login và xóa giỏ hàng để trống 
-const emptyCart = asyncHandle(async(req,res)=>{
+const removeProductCart=asyncHandle(async(req,res)=>{
+    const {_id} = req.user
+    const {cartItemId} = req.params
+    try {
+        const deleteProductCart = await cartModel.deleteOne({userId:_id,_id:cartItemId})
+        res.json(deleteProductCart)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success : false,
+            message : "delete product cart user error !"
+        })
+    }
+})
+
+
+const updateProductQuantityCart=asyncHandle(async(req,res)=>{
+    const {_id} = req.user
+    const {cartItemId,newQuantity} = req.params
+    try {
+        const cartItem = await cartModel.findOne({userId:_id,_id:cartItemId})
+        cartItem.quantity = newQuantity
+        cartItem.save()
+        res.json(cartItem)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success : false,
+            message : "delete product cart user error !"
+        })
+    }
+})
+
+
+const createOrder = asyncHandle(async(req,res)=>{
+    const {shippingInfo,orderItems,totalPrice} = req.body
+    const {_id} = req.user
+    console.log(shippingInfo,orderItems,totalPrice,_id)
+    try{
+        const order = await orderModel.create({
+            shippingInfo,orderItems,totalPrice,orderStatus:"COMPLETED", user:_id
+        })
+        res.json({
+            order,
+            success : true
+        })
+    }catch(error){
+        console.log(error)
+        res.status(500).send({
+            success : false,
+            message : "create order user error !"
+        })
+    }
+})
+
+const getMyOrder = asyncHandle(async(req,res)=>{
+    const {_id} = req.user
+    try {
+        
+        const orders = await orderModel.find({user : _id}).populate("orderItems.productId").populate("orderItems.color")
+        res.json({
+            orders
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success : false,
+            message : "create order user error !"
+        })
+    }
+})
+
+const getAllOrder = async(req,res)=>{
+    try {
+        //tìm kiếm id mà người dùng login 
+        const orderUser = await orderModel.find().populate("user").populate("orderItems.productId")
+        res.json(orderUser)
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            success : false,
+            message : "get all order user error !"
+        })
+    }
+}
+const emptyCart = async(req,res)=>{
     const {_id} = req.user
     try {
         //tìm kiếm id mà người dùng login 
         const user = await userModel.findOne({_id})
-
-        const cart = await cartModel.findOneAndDelete({orderby : user._id})
+        const cart = await cartModel.deleteMany({userId : user._id})
         res.json(cart)
 
     } catch (error) {
@@ -494,120 +556,37 @@ const emptyCart = asyncHandle(async(req,res)=>{
             message : "emptyCart user error !"
         })
     }
-})
+}
 
-
-/////
-const applyCoupon = asyncHandle(async(req,res)=>{
-    const {coupon} = req.body 
-    const {_id}=req.user
-    const validCoupon = await couponModel.findOne({name : coupon})
-    console.log(validCoupon)
-    if(validCoupon == null){
-        return res.status(500).send({
-            success : false,
-            message : "Invalid coupon !"
-        })
-    }
-    const user = await userModel.findOne({_id})
-    let {cartTotal} = await cartModel.findOne({orderby : user._id}).populate("products.product")
-    let totalAfterDiscount = (cartTotal - (cartTotal * validCoupon.discount)/100).toFixed(2)
-    await cartModel.findOneAndUpdate({orderby : user._id},{totalAfterDiscount},{new : true})
-    res.json(totalAfterDiscount)
-})
-
-const createOrder = asyncHandle(async(req,res)=>{
-    const {COD,couponApplied} = req.body
-    const {_id} = req.user
-    if(!COD){
-        return res.status(500).send({
-            success : false,
-            message : "Create cash order failed !"
-        })
-    }
+const updateStatusOrder = async(req,res)=>{
+    const { _id, status } = req.params;
     try {
-        const user = await userModel.findById(_id)
-        let userCart = await cartModel.findOne({orderby:user._id})
-        let finalAmout = 0
-        if(couponApplied && userCart.totalAfterDiscount){
-            finalAmout = userCart.totalAfterDiscount
-        }else{
-            finalAmout = userCart.cartTotal
+        // Tìm đơn hàng cần cập nhật bằng _id
+        const updateOrder = await orderModel.findById(_id);
+
+        if (!updateOrder) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found",
+            });
         }
-        let newOrder = await new orderModel({
-            products : userCart.products,
-            paymentIntent : {
-                id : uniquid(),
-                method : "COD",
-                amount : finalAmout,
-                status : "Cash on Delivery",
-                created : Date.now(),
-                currency : "usd"
-            },
-            orderby : user._id,
-            orderStatus : "Cash on Delivery"
-        }).save()
-        let update = userCart.products.map((item)=>{
-            return {
-                updateOne :{
-                    filter : {_id:item.product._id},
-                    update : {$inc:{quantity: item.count,sold : +item.count}}
-                }
-            }
-        })
-        const updated = await productModel.bulkWrite(update,{})
-        res.json({message : "success"})
 
+        // Cập nhật trạng thái đơn hàng
+        updateOrder.status = status;
+        await updateOrder.save();
+
+        res.json(updateOrder);
     } catch (error) {
-        return res.status(500).send({
-            success : false,
-            message : "Create cash order failed !"
-        })
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Update order error!",
+        });
     }
-})
-
-
-const getOrders = asyncHandle(async(req,res)=>{
-    const {_id} = req.user
-    try {
-        const userorders = await orderModel.findOne({orderby : _id}).populate("products.product").exec()
-        res.json(userorders)
-    } catch (error) {
-        console.log(error)
-        return res.status(500).send({
-            success : false,
-            message : "get order failed !",
-            error
-        })
-    }
-})
-
-
-//  cập nhật lại trạng thái của order
-const updateOrderStatus = asyncHandle(async(req,res)=>{
-    const {status} = req.body // nhập từ form 
-    const {id}=req.params  // nhận được từ id của bảng order 
-    try {
-        const updateOrderStatus = await orderModel.findByIdAndUpdate(id, // tìm tới id và cập nhật lại trạng thái của order
-            {orderStatus:status,
-                paymentIntent : {
-                    status : status
-                }
-            },{new:true})
-        res.json(updateOrderStatus)
-    } catch (error) {
-        console.log(error)
-        return res.status(500).send({
-            success : false,
-            message : "get order failed !",
-            error
-        })
-    }
-})
-
-
+}
 
 module.exports = {createUser,loginUser,getAllUsers,getsignUser,deletesignUser
     ,updateUser,blockUser,unblockUser,handleRefreshToken,logout,updatePassword,
     forgotPasswordToken,resetPassword,loginAdmin,getWishList,saveAddress,userCart,
-    getUserCart,emptyCart,applyCoupon,createOrder,getOrders,updateOrderStatus}
+    getUserCart,removeProductCart,updateProductQuantityCart,createOrder,getMyOrder,
+    getAllOrder,emptyCart,updateStatusOrder}

@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "moment-timezone": "^0.5.45",
+    "react-toastify": "^10.0.5",
     "uniqid": "^5.4.0"
   }
 }

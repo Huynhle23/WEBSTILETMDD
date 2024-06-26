@@ -21,9 +21,9 @@ const CreateBlogCategory = asyncHandle(async(req,res)=>{
 })
 
 const getBlogCategory = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const getbgCategory = await blogCategoryModel.findById(id)
+        const getbgCategory = await blogCategoryModel.findById(_id)
         res.status(200).send({
             success : true,
             message : "get category successfully",
@@ -41,11 +41,7 @@ const getBlogCategory = asyncHandle(async(req,res)=>{
 const getAllBlogCategory = asyncHandle(async(req,res)=>{
     try {
         const getbgCategory = await blogCategoryModel.find()
-        res.status(200).send({
-            success : true,
-            message : "get all category successfully",
-            getbgCategory
-        })
+        res.json(getbgCategory)
     } catch (error) {
         console.log(error)
         res.status(500).send({
@@ -56,9 +52,9 @@ const getAllBlogCategory = asyncHandle(async(req,res)=>{
 })
 
 const updateBlogCategory = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const udbgCategory = await blogCategoryModel.findByIdAndUpdate(id,req.body,{new :true})
+        const udbgCategory = await blogCategoryModel.findByIdAndUpdate(_id,req.body,{new :true})
         res.status(200).send({
             success : true,
             message : "update category successfully",
@@ -75,9 +71,9 @@ const updateBlogCategory = asyncHandle(async(req,res)=>{
 
 
 const deleteBlogCategory = asyncHandle(async(req,res)=>{
-    const {id}= req.params
+    const {_id}= req.params
     try {
-        const delCategory = await blogCategoryModel.findByIdAndDelete(id)
+        const delCategory = await blogCategoryModel.findByIdAndDelete(_id)
         res.status(200).send({
             success : true,
             message : "delete category successfully",

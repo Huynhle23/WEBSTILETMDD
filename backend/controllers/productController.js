@@ -2,7 +2,6 @@ const ProductModel = require('../models/productModel.js')
 const asyncHandle = require('express-async-handler')
 const slugify = require('slugify')
 const userModel = require('../models/userModel.js')
-const {cloudinaryUploadImg,cloudinaryDeleteImg} = require('../utils/cloudinaly.js')
 
 
 // create new product
@@ -31,6 +30,7 @@ const createProduct = asyncHandle(async(req,res)=>{
 // update product
 const updateProduct = asyncHandle(async (req, res) => {
     const {_id} = req.params;
+    console.log(req.body)
     try {
       if (req.body.title) {
         req.body.slug = slugify(req.body.title);
@@ -71,9 +71,9 @@ const deleteProduct = asyncHandle(async (req, res) => {
 
 // get a product
 const getaProduct = asyncHandle(async(req,res)=>{
-    const {_id}= req.params
+    const {id}= req.params
     try {
-        const findProduct = await ProductModel.findById(_id)
+        const findProduct = await ProductModel.findById(id).populate('color')
         res.status(200).send({
             success : true,
             message : "get a product error !",
@@ -145,11 +145,7 @@ const getAllProduct = asyncHandle(async(req,res)=>{
 
 
         const findProduct = await query // trả về kết quả
-        res.status(200).send({
-            success : true,
-            message : "get all product error !",
-            findProduct
-        })
+        res.json(findProduct)
     } catch (error) {
         console.log(error)
         res.status(500).send({
@@ -158,6 +154,29 @@ const getAllProduct = asyncHandle(async(req,res)=>{
         })
     }
 })
+
+const searchProductController = async (req, res) => {
+  try {
+    const { keyword } = req.params;
+    const resutls = await ProductModel
+      .find({
+        $or: [
+          { title: { $regex: keyword, $options: "i" } },
+          { description: { $regex: keyword, $options: "i" } },
+        ],
+      })
+      .select("-photo");
+    res.json(resutls);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      success: false,
+      message: "Error In Search Product API",
+      error,
+    });
+  }
+};
+
 
 
 const addToWishlist = asyncHandle(async(req,res)=>{
@@ -262,62 +281,9 @@ const rating = asyncHandle(async (req, res) => {
   });
 
   // tạo cloudinaly(utils) và uploadimg(middleware) trước
-const uploadImages =asyncHandle(async(req,res)=>{
-  // console.log(req.files)
-  // const {id} = req.params
-  try {
-    const uploader = (path)=>cloudinaryUploadImg(path,'images')
-    const urls =[]
-    const files = req.files
-    for(const file of files){
-      const {path}= file
-      const newPath = await uploader(path)
-      urls.push(newPath)
-    }
 
-    const images = urls.map(file=>
-    {
-      return file
-    },)
-    res.json(images)
-
-
-    // const findProduct  = await ProductModel.findByIdAndUpdate(id,{
-    //   images:urls.map(file=>
-    //   {
-    //     return file
-    //   },)
-    // },{
-    //   new:true
-    // })
-    // res.json(findProduct)
-  } catch (error) {
-    console.log(error)
-        res.status(500).send({
-            success : false,
-            message : "upload product images error !"
-        })
-  }
-})
-
-const deleteImages =asyncHandle(async(req,res)=>{
-  const {id}=req.params
-  try {
-    const deleteImg =cloudinaryDeleteImg(id,'images')
-    res.json({message:"deleted"})
-    
-
-
-  } catch (error) {
-    console.log(error)
-        res.status(500).send({
-            success : false,
-            message : "upload product images error !"
-        })
-  }
-})
 
 module.exports = {createProduct ,getaProduct,getAllProduct
-  ,updateProduct,deleteProduct,addToWishlist,rating,
-  uploadImages,deleteImages}
+  ,updateProduct,deleteProduct,addToWishlist,rating,searchProductController
+  }
 

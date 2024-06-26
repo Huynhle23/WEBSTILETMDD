@@ -41,8 +41,8 @@ const Footer = () => {
                                     Hno: 277 Near Vill chopal, <br/> Sonipat, Haryna <br />
                                     Pincode: 131103
                                 </address>
-                                <a href="tel:+84 379661878" className='mt-3 d-block mb-1 text-white'>tel:+84 379661878</a>
-                                <a href="Email: minmaxtuan@gmail.com" className='mt-2 d-block mb-0 text-white'>minmaxtuan@gmail.com</a>
+                                <a href="tel:+84 379661878" className='mt-3 d-block mb-1 text-white'>Tel: 0708484603</a>
+                                <a href="Email: minmaxtuan@gmail.com" className='mt-2 d-block mb-0 text-white'>huynhletrong23@gmail.com</a>
                                 <div className="social_icons d-flex align-items-center gap-30 mt-4">
                                     <a className='text-white' href="#">
                                         <FaLinkedin className='fs-4'/>
@@ -94,7 +94,7 @@ const Footer = () => {
                     <div className="row">
                         <div className="col-12">
                             <p className='text-center mb-0 text-white'>
-                                &copy;{new Date().getFullYear()} - Powered by Developer's AnhTuan
+                                &copy;{new Date().getFullYear()} - Powered by Developer's HuynhLe
                             </p>
                         </div>
                     </div>
